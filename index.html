@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>CAS</title>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js">
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Computer Algebra System</h1>
+
+    <section class="instructions">
+      <h2>Input Format</h2>
+      <p>
+        Use standard mathematical syntax:
+      </p>
+      <pre>
+sin(x)
+x^2 + 3*x
+ln(x)
+exp(x)
+sqrt(x)
+      </pre>
+    </section>
+
+    <section class="input">
+      <input id="expression"
+             placeholder="Enter expression e.g. sin(x) + x^2" />
+      <button id="simplifyBtn">Simplify</button>
+      <button id="diffBtn">Differentiate</button>
+      <button id="intBtn">Integrate</button>
+    </section>
+
+    <section class="rendered">
+      <h3>Input:</h3>
+      <div id="inputLatex"></div>
+
+      <h3>Output:</h3>
+      <div id="outputLatex"></div>
+    </section>
+  </div>
+
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>
