@@ -1,10 +1,11 @@
 import { tokenize } from "./tokenizer";
 import { Parser } from "./parser";
 import { toLatex } from "./latex";
+import { simplify } from "./simplify";
 
 declare var katex: any;
 
-function render() {
+function renderSimplified() {
   const input = (document.getElementById("expression") as HTMLInputElement).value;
 
   try {
@@ -12,15 +13,23 @@ function render() {
     const parser = new Parser(tokens);
     const ast = parser.parse();
 
-    const latex = toLatex(ast);
+    const simplified = simplify(ast);
 
-    katex.render(latex, document.getElementById("inputLatex"));
-    katex.render(latex, document.getElementById("outputLatex"));
-  } catch (e) {
+    const latexInput = toLatex(ast);
+    const latexOutput = toLatex(simplified);
+
+    katex.render(latexInput, document.getElementById("inputLatex"));
+    katex.render(latexOutput, document.getElementById("outputLatex"));
+  } catch {
     document.getElementById("outputLatex")!.textContent = "Error";
   }
 }
 
-document.getElementById("simplifyBtn")!.addEventListener("click", render);
-document.getElementById("diffBtn")!.addEventListener("click", render);
-document.getElementById("intBtn")!.addEventListener("click", render);
+document.getElementById("simplifyBtn")!
+  .addEventListener("click", renderSimplified);
+
+document.getElementById("diffBtn")!
+  .addEventListener("click", renderSimplified);
+
+document.getElementById("intBtn")!
+  .addEventListener("click", renderSimplified);
