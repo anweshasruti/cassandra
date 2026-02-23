@@ -100,6 +100,60 @@ class Parser {
         throw new Error("Unexpected token");
     }
 }
+function simplify(expr) {
+    switch (expr.kind) {
+        case "num":
+        case "sym":
+            return expr;
+        case "func":
+            return {
+                kind: "func",
+                name: expr.name,
+                arg: simplify(expr.arg)
+            };
+        case "bin": {
+            const left = simplify(expr.left);
+            const right = simplify(expr.right);
+            if (left.kind === "num" && right.kind === "num") {
+                switch (expr.op) {
+                    case "+": return { kind: "num", value: left.value + right.value };
+                    case "-": return { kind: "num", value: left.value - right.value };
+                    case "*": return { kind: "num", value: left.value * right.value };
+                    case "/": return { kind: "num", value: left.value / right.value };
+                    case "^": return { kind: "num", value: Math.pow(left.value, right.value) };
+                }
+            }
+            if (expr.op === "+") {
+                if (left.kind === "num" && left.value === 0)
+                    return right;
+                if (right.kind === "num" && right.value === 0)
+                    return left;
+            }
+            if (expr.op === "*") {
+                if (left.kind === "num" && left.value === 0)
+                    return { kind: "num", value: 0 };
+                if (right.kind === "num" && right.value === 0)
+                    return { kind: "num", value: 0 };
+                if (left.kind === "num" && left.value === 1)
+                    return right;
+                if (right.kind === "num" && right.value === 1)
+                    return left;
+            }
+            if (expr.op === "^") {
+                if (right.kind === "num" && right.value === 0)
+                    return { kind: "num", value: 1 };
+                if (right.kind === "num" && right.value === 1)
+                    return left;
+            }
+            return {
+                kind: "bin",
+                op: expr.op,
+                left,
+                right
+            };
+        }
+    }
+}
 function toLatex(expr) {
     switch (expr.kind) {
         case "num":
@@ -129,21 +183,26 @@ function toLatex(expr) {
             return `\\${expr.name}\\left(${toLatex(expr.arg)}\\right)`;
     }
 }
-function render() {
+function renderSimplified() {
     const input = document.getElementById("expression").value;
     try {
         const tokens = tokenize(input);
         const parser = new Parser(tokens);
         const ast = parser.parse();
-        const latex = toLatex(ast);
-        katex.render(latex, document.getElementById("inputLatex"));
-        katex.render(latex, document.getElementById("outputLatex"));
+        const simplified = simplify(ast);
+        const latexInput = toLatex(ast);
+        const latexOutput = toLatex(simplified);
+        katex.render(latexInput, document.getElementById("inputLatex"));
+        katex.render(latexOutput, document.getElementById("outputLatex"));
     }
-    catch (e) {
+    catch {
         document.getElementById("outputLatex").textContent = "Error";
     }
 }
-document.getElementById("simplifyBtn").addEventListener("click", render);
-document.getElementById("diffBtn").addEventListener("click", render);
-document.getElementById("intBtn").addEventListener("click", render);
+document.getElementById("simplifyBtn")
+    .addEventListener("click", renderSimplified);
+document.getElementById("diffBtn")
+    .addEventListener("click", renderSimplified);
+document.getElementById("intBtn")
+    .addEventListener("click", renderSimplified);
 
