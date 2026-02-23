@@ -1,4 +1,5 @@
-export function tokenize(input) {
+"use strict";
+function tokenize(input) {
     const tokens = [];
     const regex = /\s*([0-9]*\.?[0-9]+|[a-zA-Z]+|\+|\-|\*|\/|\^|\(|\))/g;
     let match;
@@ -19,7 +20,7 @@ export function tokenize(input) {
     }
     return tokens;
 }
-export class Parser {
+class Parser {
     constructor(tokens) {
         this.pos = 0;
         this.tokens = tokens;
@@ -99,7 +100,7 @@ export class Parser {
         throw new Error("Unexpected token");
     }
 }
-export function simplify(expr) {
+function simplify(expr) {
     switch (expr.kind) {
         case "num":
         case "sym":
@@ -169,7 +170,7 @@ export function simplify(expr) {
         }
     }
 }
-export function differentiate(expr, variable) {
+function differentiate(expr, variable) {
     switch (expr.kind) {
         case "num":
             return { kind: "num", value: 0 };
@@ -295,7 +296,7 @@ export function differentiate(expr, variable) {
         }
     }
 }
-export function integrate(expr, variable) {
+function integrate(expr, variable) {
     switch (expr.kind) {
         case "num":
             return {
@@ -428,7 +429,7 @@ function needsParens(parentOp, child) {
     }
     return false;
 }
-export function toLatex(expr) {
+function toLatex(expr) {
     switch (expr.kind) {
         case "num":
             return expr.value.toString();
@@ -466,12 +467,6 @@ export function toLatex(expr) {
         }
     }
 }
-import { tokenize } from "./tokenizer";
-import { Parser } from "./parser";
-import { toLatex } from "./latex";
-import { simplify } from "./simplify";
-import { differentiate } from "./differentiate";
-import { integrate } from "./integrate";
 function getAST() {
     const input = document.getElementById("expression").value;
     const tokens = tokenize(input);
