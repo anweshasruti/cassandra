@@ -2,7 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>CAS</title>
+  <title>Computer Algebra System</title>
+
+  <!-- Latin Modern (LaTeX-like font) -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/latin-modern-web@1.0.0/dist/fonts.css">
 
   <!-- KaTeX -->
   <link rel="stylesheet"
@@ -14,42 +18,55 @@
 
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <div class="container">
+
     <h1>Computer Algebra System</h1>
 
     <section class="instructions">
       <h2>Input Format</h2>
+
       <p>
-        Use standard mathematical syntax:
+        Expressions must be entered in standard mathematical infix notation
+        using characters available on a standard keyboard.
       </p>
+
       <pre>
 sin(x)
 x^2 + 3*x
 ln(x)
 exp(x)
 sqrt(x)
+(x^2 + 1)/(x - 1)
       </pre>
     </section>
 
-    <section class="input">
+    <section class="input-section">
+      <h2>Expression</h2>
+
       <input id="expression"
-             placeholder="Enter expression e.g. sin(x) + x^2" />
-      <button id="simplifyBtn">Simplify</button>
-      <button id="diffBtn">Differentiate</button>
-      <button id="intBtn">Integrate</button>
+             placeholder="Enter expression, e.g. sin(x) + x^2" />
+
+      <div class="buttons">
+        <button id="simplifyBtn">Simplify</button>
+        <button id="diffBtn">Differentiate</button>
+        <button id="intBtn">Integrate</button>
+      </div>
     </section>
 
     <section class="rendered">
-      <h3>Input:</h3>
+      <h2>Rendered Input</h2>
       <div id="inputLatex"></div>
 
-      <h3>Output:</h3>
+      <h2>Result</h2>
       <div id="outputLatex"></div>
     </section>
+
   </div>
 
   <script type="module" src="dist/main.js"></script>
+
 </body>
 </html>
