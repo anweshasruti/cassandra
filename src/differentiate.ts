@@ -1,141 +1,94 @@
 import { Expr } from "./ast";
 
-export function differentiate(expr: Expr, variable: string): Expr {
+function num(n: number): Expr {
+  return { kind: "num", value: n };
+}
+
+function sym(s: string): Expr {
+  return { kind: "sym", name: s };
+}
+
+function bin(op: string, left: Expr, right: Expr): Expr {
+  return { kind: "bin", op, left, right };
+}
+
+function func(name: string, arg: Expr): Expr {
+  return { kind: "func", name, arg };
+}
+
+export function differentiate(expr: Expr, v: string): Expr {
   switch (expr.kind) {
     case "num":
-      return { kind: "num", value: 0 };
+      return num(0);
 
     case "sym":
-      return {
-        kind: "num",
-        value: expr.name === variable ? 1 : 0
-      };
+      return num(expr.name === v ? 1 : 0);
 
     case "bin": {
-      const { op, left, right } = expr;
+      const u = expr.left;
+      const w = expr.right;
+      const du = differentiate(u, v);
+      const dw = differentiate(w, v);
 
-      if (op === "+") {
-        return {
-          kind: "bin",
-          op: "+",
-          left: differentiate(left, variable),
-          right: differentiate(right, variable)
-        };
+      switch (expr.op) {
+        case "+":
+          return bin("+", du, dw);
+
+        case "-":
+          return bin("-", du, dw);
+
+        case "*":
+          return bin("+",
+            bin("*", du, w),
+            bin("*", u, dw)
+          );
+
+        case "/":
+          return bin("/",
+            bin("-",
+              bin("*", du, w),
+              bin("*", u, dw)
+            ),
+            bin("^", w, num(2))
+          );
+
+        case "^":
+          // General rule: d(u^w) = u^w ( w' ln(u) + w u'/u )
+          return bin("*",
+            expr,
+            bin("+",
+              bin("*", dw, func("ln", u)),
+              bin("*", w, bin("/", du, u))
+            )
+          );
       }
-
-      if (op === "-") {
-        return {
-          kind: "bin",
-          op: "-",
-          left: differentiate(left, variable),
-          right: differentiate(right, variable)
-        };
-      }
-
-      if (op === "*") {
-        return {
-          kind: "bin",
-          op: "+",
-          left: {
-            kind: "bin",
-            op: "*",
-            left: differentiate(left, variable),
-            right
-          },
-          right: {
-            kind: "bin",
-            op: "*",
-            left,
-            right: differentiate(right, variable)
-          }
-        };
-      }
-
-      if (op === "^" && right.kind === "num") {
-        return {
-          kind: "bin",
-          op: "*",
-          left: {
-            kind: "bin",
-            op: "*",
-            left: { kind: "num", value: right.value },
-            right: {
-              kind: "bin",
-              op: "^",
-              left,
-              right: { kind: "num", value: right.value - 1 }
-            }
-          },
-          right: differentiate(left, variable)
-        };
-      }
-
-      return { kind: "num", value: 0 };
     }
 
     case "func": {
-      const inner = expr.arg;
-      const dInner = differentiate(inner, variable);
+      const u = expr.arg;
+      const du = differentiate(u, v);
 
-      if (expr.name === "sin") {
-        return {
-          kind: "bin",
-          op: "*",
-          left: {
-            kind: "func",
-            name: "cos",
-            arg: inner
-          },
-          right: dInner
-        };
+      switch (expr.name) {
+        case "sin":
+          return bin("*", func("cos", u), du);
+
+        case "cos":
+          return bin("*",
+            bin("*", num(-1), func("sin", u)),
+            du
+          );
+
+        case "exp":
+          return bin("*", func("exp", u), du);
+
+        case "ln":
+          return bin("*", bin("/", num(1), u), du);
+
+        default:
+          throw new Error("Unknown function: " + expr.name);
       }
-
-      if (expr.name === "cos") {
-        return {
-          kind: "bin",
-          op: "*",
-          left: {
-            kind: "bin",
-            op: "*",
-            left: { kind: "num", value: -1 },
-            right: {
-              kind: "func",
-              name: "sin",
-              arg: inner
-            }
-          },
-          right: dInner
-        };
-      }
-
-      if (expr.name === "exp") {
-        return {
-          kind: "bin",
-          op: "*",
-          left: {
-            kind: "func",
-            name: "exp",
-            arg: inner
-          },
-          right: dInner
-        };
-      }
-
-      if (expr.name === "ln") {
-        return {
-          kind: "bin",
-          op: "*",
-          left: {
-            kind: "bin",
-            op: "/",
-            left: { kind: "num", value: 1 },
-            right: inner
-          },
-          right: dInner
-        };
-      }
-
-      return { kind: "num", value: 0 };
     }
   }
+
+  throw new Error("Unsupported expression");
 }
