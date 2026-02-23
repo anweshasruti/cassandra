@@ -1,5 +1,28 @@
 import { Expr } from "./ast";
 
+function num(n: number): Expr {
+  return { kind: "num", value: n };
+}
+
+function bin(op: string, left: Expr, right: Expr): Expr {
+  return { kind: "bin", op, left, right };
+}
+
+function isNum(e: Expr): e is { kind: "num", value: number } {
+  return e.kind === "num";
+}
+
+function flatten(op: string, expr: Expr): Expr[] {
+  if (expr.kind === "bin" && expr.op === op) {
+    return [...flatten(op, expr.left), ...flatten(op, expr.right)];
+  }
+  return [expr];
+}
+
+function sortKey(e: Expr): string {
+  return JSON.stringify(e);
+}
+
 export function simplify(expr: Expr): Expr {
   switch (expr.kind) {
     case "num":
@@ -7,75 +30,73 @@ export function simplify(expr: Expr): Expr {
       return expr;
 
     case "func":
-      return {
-        kind: "func",
-        name: expr.name,
-        arg: simplify(expr.arg)
-      };
+      return { kind: "func", name: expr.name, arg: simplify(expr.arg) };
 
     case "bin": {
       const left = simplify(expr.left);
       const right = simplify(expr.right);
 
       if (expr.op === "+") {
-        if (left.kind === "num" && left.value === 0) return right;
-        if (right.kind === "num" && right.value === 0) return left;
+        let terms = flatten("+", bin("+", left, right));
 
-        if (left.kind === "num" && right.kind === "num") {
-          return { kind: "num", value: left.value + right.value };
+        let constant = 0;
+        let others: Expr[] = [];
+
+        for (const t of terms) {
+          if (isNum(t)) constant += t.value;
+          else others.push(t);
         }
 
-        return { kind: "bin", op: "+", left, right };
-      }
+        if (constant !== 0) others.push(num(constant));
+        if (others.length === 0) return num(0);
+        if (others.length === 1) return others[0];
 
-      if (expr.op === "-") {
-        if (right.kind === "num" && right.value === 0) return left;
+        others.sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
 
-        if (left.kind === "num" && right.kind === "num") {
-          return { kind: "num", value: left.value - right.value };
-        }
-
-        return { kind: "bin", op: "-", left, right };
+        return others.reduce((a, b) => bin("+", a, b));
       }
 
       if (expr.op === "*") {
-        if (left.kind === "num" && left.value === 0) return { kind: "num", value: 0 };
-        if (right.kind === "num" && right.value === 0) return { kind: "num", value: 0 };
+        let factors = flatten("*", bin("*", left, right));
 
-        if (left.kind === "num" && left.value === 1) return right;
-        if (right.kind === "num" && right.value === 1) return left;
+        let constant = 1;
+        let others: Expr[] = [];
 
-        if (left.kind === "num" && right.kind === "num") {
-          return { kind: "num", value: left.value * right.value };
+        for (const f of factors) {
+          if (isNum(f)) constant *= f.value;
+          else others.push(f);
         }
 
-        return { kind: "bin", op: "*", left, right };
+        if (constant === 0) return num(0);
+        if (constant !== 1) others.unshift(num(constant));
+
+        if (others.length === 0) return num(1);
+        if (others.length === 1) return others[0];
+
+        others.sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+
+        return others.reduce((a, b) => bin("*", a, b));
+      }
+
+      if (expr.op === "-") {
+        return simplify(bin("+", left, bin("*", num(-1), right)));
       }
 
       if (expr.op === "/") {
-        if (left.kind === "num" && left.value === 0) return { kind: "num", value: 0 };
-
-        if (right.kind === "num" && right.value === 1) return left;
-
-        if (left.kind === "num" && right.kind === "num") {
-          return { kind: "num", value: left.value / right.value };
-        }
-
-        return { kind: "bin", op: "/", left, right };
+        if (isNum(left) && isNum(right))
+          return num(left.value / right.value);
+        return bin("/", left, right);
       }
 
       if (expr.op === "^") {
-        if (right.kind === "num" && right.value === 1) return left;
-        if (right.kind === "num" && right.value === 0) return { kind: "num", value: 1 };
-
-        if (left.kind === "num" && right.kind === "num") {
-          return { kind: "num", value: Math.pow(left.value, right.value) };
-        }
-
-        return { kind: "bin", op: "^", left, right };
+        if (isNum(right) && right.value === 0) return num(1);
+        if (isNum(right) && right.value === 1) return left;
+        if (isNum(left) && isNum(right))
+          return num(Math.pow(left.value, right.value));
+        return bin("^", left, right);
       }
 
-      return { kind: "bin", op: expr.op, left, right };
+      return bin(expr.op, left, right);
     }
   }
 }
