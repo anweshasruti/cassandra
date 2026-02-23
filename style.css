@@ -1,40 +1,104 @@
+/* Base document */
+
 body {
-  font-family: "Georgia", serif;
-  background: #f8f8f8;
+  background: white;
   color: #111;
-  display: flex;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
+  font-family: "Latin Modern Roman", "Times New Roman", serif;
+  line-height: 1.65;
+  font-size: 17px;
 }
+
+/* Main academic column */
 
 .container {
-  width: 800px;
-  margin-top: 60px;
+  max-width: 780px;
+  margin-left: 120px;   /* academic-style left margin */
+  margin-top: 80px;
+  margin-bottom: 120px;
 }
+
+/* Headings */
 
 h1 {
-  text-align: center;
   font-weight: normal;
-  letter-spacing: 1px;
+  font-size: 2.2rem;
+  margin-bottom: 50px;
 }
 
-input {
+h2 {
+  font-weight: normal;
+  font-size: 1.25rem;
+  margin-top: 60px;
+  margin-bottom: 15px;
+}
+
+/* Instruction block */
+
+.instructions p {
+  margin-bottom: 20px;
+}
+
+.instructions pre {
+  border-left: 2px solid #aaa;
+  padding-left: 15px;
+  font-family: "Latin Modern Mono", monospace;
+  font-size: 0.95rem;
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+/* Input */
+
+.input-section input {
   width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 10px;
+  border: none;
+  border-bottom: 1px solid #888;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 0;
+  outline: none;
+  background: transparent;
+}
+
+.input-section input:focus {
+  border-bottom: 1px solid #000;
+}
+
+/* Buttons */
+
+.buttons {
+  margin-top: 20px;
 }
 
 button {
-  padding: 8px 14px;
-  margin-right: 6px;
+  background: none;
   border: 1px solid #aaa;
-  background: white;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-right: 10px;
   cursor: pointer;
 }
 
-.rendered {
-  margin-top: 40px;
+button:hover {
+  background: #f5f5f5;
 }
+
+/* Rendered output */
+
+.rendered {
+  margin-top: 70px;
+}
+
+.rendered div {
+  margin-top: 15px;
+  margin-bottom: 30px;
+  min-height: 30px;
+}
+
+/* KaTeX sizing */
 
 .katex {
   font-size: 1.3em;
