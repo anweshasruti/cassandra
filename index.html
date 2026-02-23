@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Computer Algebra System</title>
+  <title>Cassandra</title>
 
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/latin-modern-web@1.0.0/dist/fonts.css">
@@ -21,14 +21,16 @@
 
   <div class="container">
 
-    <h1>Computer Algebra System</h1>
+    <h1>Cassandra (my rather clumsy attempt at a CAS)</h1>
 
     <section class="instructions">
-      <h2>Input Format</h2>
+      <h2>A note on the way expressions should be input</h2>
 
       <p>
-        Expressions must be entered in standard mathematical infix notation
-        using characters available on a standard keyboard.
+        Expressions should be entered in standard mathematical infix notation.
+        Most expressions ought to be quite simple to input using characters available
+        on a standard keyboard. The way input is handled is similar to the LineIO mode
+        on Casio calculators. Some examples of valid input syntax:
       </p>
 
       <pre>
@@ -55,7 +57,7 @@ sqrt(x)
     </section>
 
     <section class="rendered">
-      <h2>Rendered Input</h2>
+      <h2>Rendered input</h2>
       <div id="inputLatex"></div>
 
       <h2>Result</h2>
