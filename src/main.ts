@@ -3,6 +3,7 @@ import { Parser } from "./parser";
 import { toLatex } from "./latex";
 import { simplify } from "./simplify";
 import { differentiate } from "./differentiate";
+import { integrate } from "./integrate";
 
 declare var katex: any;
 
@@ -13,7 +14,7 @@ function getAST(): any {
   return parser.parse();
 }
 
-function renderResult(resultAST: any, originalAST: any) {
+function render(originalAST: any, resultAST: any) {
   const latexInput = toLatex(originalAST);
   const latexOutput = toLatex(simplify(resultAST));
 
@@ -25,7 +26,7 @@ document.getElementById("simplifyBtn")!
   .addEventListener("click", () => {
     try {
       const ast = getAST();
-      renderResult(ast, ast);
+      render(ast, ast);
     } catch {
       document.getElementById("outputLatex")!.textContent = "Error";
     }
@@ -36,7 +37,7 @@ document.getElementById("diffBtn")!
     try {
       const ast = getAST();
       const derivative = differentiate(ast, "x");
-      renderResult(derivative, ast);
+      render(ast, derivative);
     } catch {
       document.getElementById("outputLatex")!.textContent = "Error";
     }
@@ -44,5 +45,11 @@ document.getElementById("diffBtn")!
 
 document.getElementById("intBtn")!
   .addEventListener("click", () => {
-    document.getElementById("outputLatex")!.textContent = "Integration not yet implemented";
+    try {
+      const ast = getAST();
+      const integral = integrate(ast, "x");
+      render(ast, integral);
+    } catch {
+      document.getElementById("outputLatex")!.textContent = "Error";
+    }
   });
